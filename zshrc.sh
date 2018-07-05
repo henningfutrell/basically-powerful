@@ -3,7 +3,10 @@ if [[ `uname` == 'Darwin' ]]; then
 else
     z_core="$(dirname "$(readlink -f ~/.zshrc)")"
 fi
-echo "Zsh configuration files sourced from $z_core..."
+
+cd $z_core
+git pull update master 1&> /dev/null
+cd ~
 
 source "$z_core/builder.sh"
 
