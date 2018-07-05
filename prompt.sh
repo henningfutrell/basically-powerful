@@ -21,10 +21,16 @@ source "$z_core/git_prompt.sh"
 # Allows functions in the prompt
 setopt PROMPT_SUBST
 
-main_prompt="${nl}${pc}╭─%n@%m ${dc}%~${rc}"
-entry_indicator="${pc}╰─ "
+main_prompt="%{${nl}${pc}%}╭─%n@%m %{${dc}%}%~%{${rc}%}"
+entry_indicator="%{${pc}%}╰─%{${dc}%} "
 
-PROMPT='$main_prompt $(git_status)
-$entry_indicator'
-PS2='$pc.. '
-PS3='$pc... '
+# If completion expands after initial word (e.g. > ls  <completed ls>)
+# first check that $LANG is en_US.UTF-8. if this is wrong either set 
+# LANG=en_US.UTF-8 in /etc/locale.conf for system wide or uncomment below
+# to set for user (if you don't have permissions or whatnot).
+# export LANG=en_US.UTF-8
+
+PROMPT="$main_prompt $(git_status)
+$entry_indicator"
+#PS2='$pc.. '
+#PS3='$pc... '
