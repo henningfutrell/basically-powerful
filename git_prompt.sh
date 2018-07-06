@@ -3,7 +3,9 @@ source "$z_core/zsh-git-prompt/zshrc.sh"
 
 # Set a custom status prompt
 git_status() {
-    if [ -n "$__CURRENT_GIT_STATUS" ]; then
+    precmd_update_git_vars
+
+    if [ "$__CURRENT_GIT_STATUS" != ": 0 0 0 0 0 0" ]; then
         # symbols
         # ● ✖ ✚ ✔  …
 

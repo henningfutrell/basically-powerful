@@ -10,18 +10,25 @@ pc="%{$fg[default]%}"
 dc="%{$fg[yellow]%}"
 # Reset color
 rc="%{$reset_color%}"
-# New line
+# New line: This seems to reevaluate when screen size changed
 nl=$'\n'
 
+# Set the precmd
+function precmd {
+  local TERMWIDTH
+  (( TERMWIDTH = ${COLUMNS} - 1 ))
+
+}
 # Load in git prompt
 source "$z_core/git_prompt.sh"
 
 # Sybmols
 # ╭─ ╰─ ➜
 # Allows functions in the prompt
-#setopt PROMPT_SUBST
+setopt PROMPT_SUBST
 
-main_prompt="%{${nl}${pc}%}╭─%n@%m %{${dc}%}%~%{${rc}%}"
+main_prompt="
+%{${pc}%}╭─%n@%m %{${dc}%}%~%{${rc}%}"
 entry_indicator="%{${pc}%}╰─%{${dc}%} "
 
 # If completion expands after initial word (e.g. > ls  <completed ls>)
@@ -30,8 +37,7 @@ entry_indicator="%{${pc}%}╰─%{${dc}%} "
 # to set for user (if you don't have permissions or whatnot).
 # export LANG=en_US.UTF-8
 
-PROMPT='%{${nl}${pc}%}╭─%n@%m %{${dc}%}%~%{${rc}%}$(git_status)_
+PROMPT='$main_prompt $(git_status)
 $entry_indicator'
-RPROMPT='$(git_super_status)'
 #PS2='$pc.. '
 #PS3='$pc... '
