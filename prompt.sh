@@ -19,7 +19,7 @@ source "$z_core/git_prompt.sh"
 # Sybmols
 # ╭─ ╰─ ➜
 # Allows functions in the prompt
-setopt PROMPT_SUBST
+#setopt PROMPT_SUBST
 
 main_prompt="%{${nl}${pc}%}╭─%n@%m %{${dc}%}%~%{${rc}%}"
 entry_indicator="%{${pc}%}╰─%{${dc}%} "
@@ -30,7 +30,8 @@ entry_indicator="%{${pc}%}╰─%{${dc}%} "
 # to set for user (if you don't have permissions or whatnot).
 # export LANG=en_US.UTF-8
 
-PROMPT="$main_prompt $(git_super_status)
-$entry_indicator"
+PROMPT='%{${nl}${pc}%}╭─%n@%m %{${dc}%}%~%{${rc}%}$(git_status)_
+$entry_indicator'
+RPROMPT='$(git_super_status)'
 #PS2='$pc.. '
 #PS3='$pc... '
