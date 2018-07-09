@@ -6,4 +6,3 @@ export update_basically_powerful_zsh () {
     cd $current_dir
     unset current_dir
 }
-
