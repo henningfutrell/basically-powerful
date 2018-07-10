@@ -35,7 +35,10 @@ function get_git_info() {
 }
 
 function git_status() {
+	# Check if in a git repository, else do nothing
 	if git rev-parse --git-dir >/dev/null 2>&1; then
+		# Parse info from the git info aggregator
+		# order is in function get_git_info
 		local git_info=$(get_git_info)
 		local staged=$(awk 'BEGIN {OFS=" ";}; {printf "%s", $1}' <<<$git_info)
 		local changed=$(awk 'BEGIN {OFS=" ";}; {printf "%s", $2}' <<<$git_info)
@@ -47,7 +50,6 @@ function git_status() {
 
 		# symbols
 		# ● ✖ ✚ ✔  …
-
 		# Prefixes, colors, suffixes
 		local c_branch_clean="%{$fg_bold[green]%}"
 		local c_branch_dirty="%{$fg_bold[red]%}"
@@ -59,15 +61,16 @@ function git_status() {
 		local c_ahead="$rc ↑"
 
 		# Prompt combinators
-		local branch_prompt=''
+		local branch_prompt='on '
 		local changes_prompt=''
 
-		# If no changes, prompt should be green and carry on. Else, show changes in git_info
+		# If no changes, prompt should be positive and carry on. Else, show changes in git_info
 		# and change branch name color to indicate.
 		if [ "$changed" -eq "0" ] && [ "$conflicts" -eq "0" ] && [ "$staged" -eq "0" ] && [ "$untracked" -eq "0" ]; then
 			branch_prompt="$branch_prompt$c_branch_clean"
 		else
 			branch_prompt="$branch_prompt$c_branch_dirty"
+
 			changes_prompt="$changes_prompt"
 			if [ "$staged" -ne "0" ]; then
 				changes_prompt="$changes_prompt$c_staged$staged$rc"
