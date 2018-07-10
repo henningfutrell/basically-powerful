@@ -1,39 +1,39 @@
 function get_git_info {
-  # The returned git info is predecated on git managing changes. This is a
+  # The returned git info is predicated on git managing changes. This is a
   # useful distinction when it comes to adding a change and modifying the file.
   # In VSCode this is marked as a modified file, which is true, but git will
   # commit a change to the file. For this reason git info will report a file to
   # be staged AND changed, because we are considering the changes and not just
   # the file.
 
-  # Preloads git git_status -s. This will only be evaluated once. The git_status string
+  # Preloads git git_info -s. This will only be evaluated once. The git_info string
   # must be quoted to preserve new lines.
-  local git_status=$(git status -s)
+  local git_info=$(git status -s)
 
   # { "A " => newly added, "M " => modified } and staged
-  local staged=$(egrep "^(A.|M.)" <<< "$git_status" | wc -l | tr -d "[:space:]")
+  local staged=$(egrep "^(A.|M.)" <<< "$git_info" | wc -l | tr -d "[:space:]")
 
   # "AM|MM" => addendum changes to staged file are unstaged
-  local changed=$(egrep "^.M" <<< "$git_status" | wc -l | tr -d "[:space:]")
+  local changed=$(egrep "^.M" <<< "$git_info" | wc -l | tr -d "[:space:]")
 
   # "??" => wholly untracked
-  local untracked=$(egrep "^\?\?" <<< "$git_status" | wc -l | tr -d "[:space:]")
+  local untracked=$(egrep "^\?\?" <<< "$git_info" | wc -l | tr -d "[:space:]")
 
   # { "AA" => (add/add), "UU" => unmerged paths } conflict 
-  local conflicted=$(egrep "^(AA|UU)" <<< "$git_status" | wc -l | tr -d "[:space:]")
+  local conflicted=$(egrep "^(AA|UU)" <<< "$git_info" | wc -l | tr -d "[:space:]")
 
   # Can be parsed with awk 'BEGIN {OFS=" ";}; {printf "%s", $n}' where $n is $1,
   # $2...related to order in this string.
   echo "$staged $changed $untracked $conflicted"
 }
 
-git_status() {
+function git_status {
     if git rev-parse --git-dir > /dev/null 2>&1  ||  git rev-parse --is-inside-working-tree 2> /dev/null ; then
-        local git_status=$(get_git_info)
-        local staged=$(awk 'BEGIN {OFS=" ";}; {printf "%s", $1}' <<< $git_status)
-        local changed=$(awk 'BEGIN {OFS=" ";}; {printf "%s", $2}' <<< $git_status)
-        local untracked=$(awk 'BEGIN {OFS=" ";}; {printf "%s", $3}' <<< $git_status)
-        local conflicted=$(awk 'BEGIN {OFS=" ";}; {printf "%s", $4}' <<< $git_status)
+        local git_info=$(get_git_info)
+        local staged=$(awk 'BEGIN {OFS=" ";}; {printf "%s", $1}' <<< $git_info)
+        local changed=$(awk 'BEGIN {OFS=" ";}; {printf "%s", $2}' <<< $git_info)
+        local untracked=$(awk 'BEGIN {OFS=" ";}; {printf "%s", $3}' <<< $git_info)
+        local conflicted=$(awk 'BEGIN {OFS=" ";}; {printf "%s", $4}' <<< $git_info)
         local branch=$(git rev-parse --abbrev-ref HEAD)
 
         # symbols
@@ -53,7 +53,7 @@ git_status() {
         local branch_prompt=' '
         local changes_prompt=' ' 
 
-        # If no changes, prompt should be green and carry on. Else, show changes in git_status
+        # If no changes, prompt should be green and carry on. Else, show changes in git_info
         # and change branch name color to indicate.
         if [ "$changed" -eq "0" ] && [ "$conflicts" -eq "0" ] && [ "$staged" -eq "0" ] && [ "$untracked" -eq "0" ]; then
             branch_prompt="$branch_prompt$c_branch_clean"
