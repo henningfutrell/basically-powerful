@@ -26,8 +26,8 @@ function get_git_info() {
 	local tracking_branch=$(git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD))
 	# creates global variables $1 and $2 based on left vs. right tracking
 	# inspired by @adam_spiers
-	local ahead=$(git rev-list --count $tracking_branch..HEAD)
-	local behind=$(git rev-list --count HEAD..$tracking_branch)
+	local ahead=$(git rev-list --count $tracking_branch..HEAD 2>/dev/null)
+	local behind=$(git rev-list --count HEAD..$tracking_branch 2>/dev/null)
 
 	# Can be parsed with awk 'BEGIN {OFS=" ";}; {printf "%s", $n}' where $n is $1,
 	# $2...related to order in this string.
