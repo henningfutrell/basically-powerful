@@ -36,56 +36,47 @@ git_status() {
         local conflicted=$(awk 'BEGIN {OFS=" ";}; {printf "%s", $4}' <<< $git_status)
         local branch=$(git rev-parse --abbrev-ref HEAD)
 
-        #if [ "$git_status" != "0 0 0 0" ]; then
-            # symbols
-            # ● ✖ ✚ ✔  …
+        # symbols
+        # ● ✖ ✚ ✔  …
 
-            # Prefixes, colors, suffixes
-            local c_branch_clean="%{$fg_bold[green]%}"
-            local c_branch_dirty="%{$fg_bold[red]%}"
-            local c_staged=" %{$fg[green]%}●"
-            local c_changed=" %{$fg[yellow]%}●"
-            local c_untracked=" %{$fg[cyan]%}●"
-            local c_conflicts=" %{$fg[red]%}✖"
-            local c_behind=" ↓"
-            local c_ahead=" ↑"
+        # Prefixes, colors, suffixes
+        local c_branch_clean="%{$fg_bold[green]%}"
+        local c_branch_dirty="%{$fg_bold[red]%}"
+        local c_staged=" %{$fg[green]%}●"
+        local c_changed=" %{$fg[yellow]%}●"
+        local c_untracked=" %{$fg[cyan]%}●"
+        local c_conflicts=" %{$fg[red]%}✖"
+        local c_behind=" ↓"
+        local c_ahead=" ↑"
 
-            # Prompt combinators
-            local branch_prompt=' '
-            local changes_prompt=' ' 
+        # Prompt combinators
+        local branch_prompt=' '
+        local changes_prompt=' ' 
 
-            # If no changes, prompt should be green and carry on. Else, show changes in git_status
-            # and change branch name color to indicate.
-            if [ "$changed" -eq "0" ] && [ "$conflicts" -eq "0" ] && [ "$staged" -eq "0" ] && [ "$untracked" -eq "0" ]; then
-                branch_prompt="$branch_prompt$c_branch_clean"
-            else
-                branch_prompt="$branch_prompt$c_branch_dirty"
-                changes_prompt="$changes_prompt"
-                if [ "$staged" -ne "0" ]; then
-                    changes_prompt="$changes_prompt$c_staged$staged$rc"
-                fi
-                if [ "$changed" -ne "0" ]; then
-                    changes_prompt="$changes_prompt$c_changed$changed$rc"
-                fi
-                if [ "$untracked" -ne "0" ]; then
-                    changes_prompt="$changes_prompt$c_untracked$untracked$rc"
-                fi
-                if [ "$conflicted" -ne "0" ]; then
-                    changes_prompt="$changes_prompt$c_conflicts$conflicts$rc"
-                fi
-                changes_prompt="$changes_prompt$CHANGES_SUFFIX"
+        # If no changes, prompt should be green and carry on. Else, show changes in git_status
+        # and change branch name color to indicate.
+        if [ "$changed" -eq "0" ] && [ "$conflicts" -eq "0" ] && [ "$staged" -eq "0" ] && [ "$untracked" -eq "0" ]; then
+            branch_prompt="$branch_prompt$c_branch_clean"
+        else
+            branch_prompt="$branch_prompt$c_branch_dirty"
+            changes_prompt="$changes_prompt"
+            if [ "$staged" -ne "0" ]; then
+                changes_prompt="$changes_prompt$c_staged$staged$rc"
             fi
+            if [ "$changed" -ne "0" ]; then
+                changes_prompt="$changes_prompt$c_changed$changed$rc"
+            fi
+            if [ "$untracked" -ne "0" ]; then
+                changes_prompt="$changes_prompt$c_untracked$untracked$rc"
+            fi
+            if [ "$conflicted" -ne "0" ]; then
+                changes_prompt="$changes_prompt$c_conflicts$conflicts$rc"
+            fi
+            changes_prompt="$changes_prompt$CHANGES_SUFFIX"
+        fi
 
-            branch_prompt="$branch_prompt$branch$rc"
-           # if [ "$GIT_BEHIND" -ne "0" ]; then
-           #     branch_prompt="$branch_prompt$C_BEHIND$GIT_BEHIND$rc"
-           # fi
-           # if [ "$GIT_AHEAD" -ne "0" ]; then
-           #     branch_prompt="$branch_prompt$C_AHEAD$GIT_AHEAD$rc"
-           # fi
-           # branch_prompt="$branch_prompt$BRANCH_SUFFIX"
+        branch_prompt="$branch_prompt$branch$rc"
 
-            echo "$branch_prompt$changes_prompt"
-  #      fi
+        echo "$branch_prompt$changes_prompt"
     fi
 }
