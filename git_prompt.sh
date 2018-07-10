@@ -36,7 +36,7 @@ git_status() {
         local conflicted=$(awk 'BEGIN {OFS=" ";}; {printf "%s", $4}' <<< $git_status)
         local branch=$(git rev-parse --abbrev-ref HEAD)
 
-        if [ "$git_status" != "0 0 0 0" ]; then
+        #if [ "$git_status" != "0 0 0 0" ]; then
             # symbols
             # ● ✖ ✚ ✔  …
 
@@ -86,6 +86,6 @@ git_status() {
            # branch_prompt="$branch_prompt$BRANCH_SUFFIX"
 
             echo "$branch_prompt$changes_prompt"
-        fi
+  #      fi
     fi
 }
