@@ -1,64 +1,91 @@
-# Get super awesome stuff these peeps did
-source "$z_core/zsh-git-prompt/zshrc.sh"
+function get_git_info {
+  # The returned git info is predecated on git managing changes. This is a
+  # useful distinction when it comes to adding a change and modifying the file.
+  # In VSCode this is marked as a modified file, which is true, but git will
+  # commit a change to the file. For this reason git info will report a file to
+  # be staged AND changed, because we are considering the changes and not just
+  # the file.
 
-# Set a custom status prompt
+  # Preloads git git_status -s. This will only be evaluated once. The git_status string
+  # must be quoted to preserve new lines.
+  local git_status=$(git status -s)
+
+  # { "A " => newly added, "M " => modified } and staged
+  local staged=$(egrep "^(A.|M.)" <<< "$git_status" | wc -l | tr -d "[:space:]")
+
+  # "AM|MM" => addendum changes to staged file are unstaged
+  local changed=$(egrep "^.M" <<< "$git_status" | wc -l | tr -d "[:space:]")
+
+  # "??" => wholly untracked
+  local untracked=$(egrep "^\?\?" <<< "$git_status" | wc -l | tr -d "[:space:]")
+
+  # { "AA" => (add/add), "UU" => unmerged paths } conflict 
+  local conflicted=$(egrep "^(AA|UU)" <<< "$git_status" | wc -l | tr -d "[:space:]")
+
+  # Can be parsed with awk 'BEGIN {OFS=" ";}; {printf "%s", $n}' where $n is $1,
+  # $2...related to order in this string.
+  echo "$staged $changed $untracked $conflicted"
+}
+
 git_status() {
-    precmd_update_git_vars
+    if git rev-parse --git-dir > /dev/null 2>&1  ||  git rev-parse --is-inside-working-tree 2> /dev/null ; then
+        local git_status=$(get_git_info)
+        local staged=$(awk 'BEGIN {OFS=" ";}; {printf "%s", $1}' <<< $git_status)
+        local changed=$(awk 'BEGIN {OFS=" ";}; {printf "%s", $2}' <<< $git_status)
+        local untracked=$(awk 'BEGIN {OFS=" ";}; {printf "%s", $3}' <<< $git_status)
+        local conflicted=$(awk 'BEGIN {OFS=" ";}; {printf "%s", $4}' <<< $git_status)
+        local branch=$(git rev-parse --abbrev-ref HEAD)
 
-    if [ "$__CURRENT_GIT_STATUS" != ": 0 0 0 0 0 0" ]; then
-        # symbols
-        # ● ✖ ✚ ✔  …
+        if [ "$git_status" != "0 0 0 0" ]; then
+            # symbols
+            # ● ✖ ✚ ✔  …
 
-        # Prefixes, colors, suffixes
-        local BRANCH_PREFIX=" on "
-        local BRANCH_SUFFIX=""
-        local CHANGES_PREFIX=""
-        local CHANGES_SUFFIX=""
-        local PROMPT_SEPARATOR=" "
-        local C_BRANCH_UNCHANGED="%{$fg_bold[green]%}"
-        local C_BRANCH_CHANGED="%{$fg_bold[red]%}"
-        local C_STAGED=" %{$fg[green]%}●"
-        local C_CHANGED=" %{$fg[yellow]%}●"
-        local C_UNTRACKED=" %{$fg[cyan]%}●"
-        local C_CONFLICTS=" %{$fg[red]%}✖"
-        local C_BEHIND=" ↓"
-        local C_AHEAD=" ↑"
+            # Prefixes, colors, suffixes
+            local c_branch_clean="%{$fg_bold[green]%}"
+            local c_branch_dirty="%{$fg_bold[red]%}"
+            local c_staged=" %{$fg[green]%}●"
+            local c_changed=" %{$fg[yellow]%}●"
+            local c_untracked=" %{$fg[cyan]%}●"
+            local c_conflicts=" %{$fg[red]%}✖"
+            local c_behind=" ↓"
+            local c_ahead=" ↑"
 
-        # Prompt combinators
-        local branch_prompt="$BRANCH_PREFIX"
-        local changes_prompt=""
+            # Prompt combinators
+            local branch_prompt=' '
+            local changes_prompt=' ' 
 
-        # If no changes, prompt should be green and carry on. Else, show changes in status
-        # and change branch name color to indicate.
-        if [ "$GIT_CHANGED" -eq "0" ] && [ "$GIT_CONFLICTS" -eq "0" ] && [ "$GIT_STAGED" -eq "0" ] && [ "$GIT_UNTRACKED" -eq "0" ]; then
-            branch_prompt="$branch_prompt$C_BRANCH_UNCHANGED"
-        else
-            branch_prompt="$branch_prompt$C_BRANCH_CHANGED"
-            changes_prompt="$changes_prompt$CHANGES_PREFIX"
-            if [ "$GIT_STAGED" -ne "0" ]; then
-                changes_prompt="$changes_prompt$C_STAGED$GIT_STAGED$rc"
+            # If no changes, prompt should be green and carry on. Else, show changes in git_status
+            # and change branch name color to indicate.
+            if [ "$changed" -eq "0" ] && [ "$conflicts" -eq "0" ] && [ "$staged" -eq "0" ] && [ "$untracked" -eq "0" ]; then
+                branch_prompt="$branch_prompt$c_branch_clean"
+            else
+                branch_prompt="$branch_prompt$c_branch_dirty"
+                changes_prompt="$changes_prompt"
+                if [ "$staged" -ne "0" ]; then
+                    changes_prompt="$changes_prompt$c_staged$staged$rc"
+                fi
+                if [ "$changed" -ne "0" ]; then
+                    changes_prompt="$changes_prompt$c_changed$changed$rc"
+                fi
+                if [ "$untracked" -ne "0" ]; then
+                    changes_prompt="$changes_prompt$c_untracked$untracked$rc"
+                fi
+                if [ "$conflicted" -ne "0" ]; then
+                    changes_prompt="$changes_prompt$c_conflicts$conflicts$rc"
+                fi
+                changes_prompt="$changes_prompt$CHANGES_SUFFIX"
             fi
-            if [ "$GIT_CHANGED" -ne "0" ]; then
-                changes_prompt="$changes_prompt$C_CHANGED$GIT_CHANGED$rc"
-            fi
-            if [ "$GIT_UNTRACKED" -ne "0" ]; then
-                changes_prompt="$changes_prompt$C_UNTRACKED$GIT_UNTRACKED$rc"
-            fi
-            if [ "$GIT_CONFLICTS" -ne "0" ]; then
-                changes_prompt="$changes_prompt$C_CONFLICTS$GIT_CONFLICTS$rc"
-            fi
-            changes_prompt="$changes_prompt$CHANGES_SUFFIX"
+
+            branch_prompt="$branch_prompt$branch$rc"
+           # if [ "$GIT_BEHIND" -ne "0" ]; then
+           #     branch_prompt="$branch_prompt$C_BEHIND$GIT_BEHIND$rc"
+           # fi
+           # if [ "$GIT_AHEAD" -ne "0" ]; then
+           #     branch_prompt="$branch_prompt$C_AHEAD$GIT_AHEAD$rc"
+           # fi
+           # branch_prompt="$branch_prompt$BRANCH_SUFFIX"
+
+            echo "$branch_prompt$changes_prompt"
         fi
-
-        branch_prompt="$branch_prompt$GIT_BRANCH$rc"
-        if [ "$GIT_BEHIND" -ne "0" ]; then
-            branch_prompt="$branch_prompt$C_BEHIND$GIT_BEHIND$rc"
-        fi
-        if [ "$GIT_AHEAD" -ne "0" ]; then
-            branch_prompt="$branch_prompt$C_AHEAD$GIT_AHEAD$rc"
-        fi
-        branch_prompt="$branch_prompt$BRANCH_SUFFIX"
-
-        echo "$branch_prompt$changes_prompt$parse_git_dirty"
     fi
 }
