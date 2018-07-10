@@ -28,13 +28,13 @@ function get_git_info {
 }
 
 function git_status {
-    if git rev-parse --git-dir > /dev/null 2>&1  ||  git rev-parse --is-inside-working-tree 2> /dev/null ; then
+    if git rev-parse --git-dir > /dev/null 2>&1;  then
         local git_info=$(get_git_info)
         local staged=$(awk 'BEGIN {OFS=" ";}; {printf "%s", $1}' <<< $git_info)
         local changed=$(awk 'BEGIN {OFS=" ";}; {printf "%s", $2}' <<< $git_info)
         local untracked=$(awk 'BEGIN {OFS=" ";}; {printf "%s", $3}' <<< $git_info)
         local conflicted=$(awk 'BEGIN {OFS=" ";}; {printf "%s", $4}' <<< $git_info)
-        local branch=$(git rev-parse --abbrev-ref HEAD)
+        local branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
 
         # symbols
         # ● ✖ ✚ ✔  …
