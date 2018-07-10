@@ -37,8 +37,7 @@ entry_indicator="%{${pc}%}╰─%{${dc}%} "
 # to set for user (if you don't have permissions or whatnot).
 # export LANG=en_US.UTF-8
 
-RPROMPT='$(git_status)'
-PROMPT='$main_prompt
+PROMPT='$main_prompt $(git_status)
 $entry_indicator'
 #PS2='$pc.. '
 #PS3='$pc... '
