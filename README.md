@@ -11,12 +11,5 @@ $ git clone --recurse-submodules https://github.com/henningfutrell/basically-pow
 ### Map zshrc to ~/.zshrc
 
 ```
-$ ln -s ~/.zsh/zshrc ~/.zshrc
-```
-
-## Updating
-
-Basically Powerful Zsh adds an updating function to the shell environment. To update run:
-```
-$ update_basically_powerful_zsh
+$ ln -s ~/.zsh/zshrc.sh ~/.zshrc
 ```
