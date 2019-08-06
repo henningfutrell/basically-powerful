@@ -4,13 +4,8 @@ High-speed low-drag zsh settings.
 
 ## Install
 
-Using ssh:
 ```
-$ git clone git@github.com:henningfutrell/basically-powerful-zsh.git ~/.zsh
-```
-Using html:
-```
-$ git clone https://github.com/henningfutrell/basically-powerful-zsh ~/.zsh
+$ git clone --recurse-submodules https://github.com/henningfutrell/basically-powerful-zsh ~/.zsh
 ```
 
 ### Map zshrc to ~/.zshrc
