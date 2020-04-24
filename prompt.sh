@@ -35,7 +35,7 @@ entry_indicator="%{${pc}%}╰─%{${dc}%} "
 # first check that $LANG is en_US.UTF-8. if this is wrong either set 
 # LANG=en_US.UTF-8 in /etc/locale.conf for system wide or uncomment below
 # to set for user (if you don't have permissions or whatnot).
-# export LANG=en_US.UTF-8
+export LANG=en_US.UTF-8
 
 PROMPT='$main_prompt $(git_status)
 $entry_indicator'
