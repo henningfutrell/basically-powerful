@@ -11,16 +11,16 @@ function get_git_info() {
 	local git_info=$(git status -s)
 
 	# { "A " => newly added, "M " => modified } and staged
-	local staged=$(egrep -E "^(A.|M.)" <<<"$git_info" | wc -l | tr -d "[:space:]")
+	local staged=$(grep -E "^(A.|M.)" <<<"$git_info" | wc -l | tr -d "[:space:]")
 
 	# "AM|MM" => addendum changes to staged file are unstaged
-	local changed=$(egrep -E "^.M" <<<"$git_info" | wc -l | tr -d "[:space:]")
+	local changed=$(grep -E "^.M" <<<"$git_info" | wc -l | tr -d "[:space:]")
 
 	# "??" => wholly untracked
-	local untracked=$(egrep -E "^\?\?" <<<"$git_info" | wc -l | tr -d "[:space:]")
+	local untracked=$(grep -E "^\?\?" <<<"$git_info" | wc -l | tr -d "[:space:]")
 
 	# { "AA" => (add/add), "UU" => unmerged paths } conflict
-	local conflicted=$(egrep -E "^(AA|UU)" <<<"$git_info" | wc -l | tr -d "[:space:]")
+	local conflicted=$(grep -E "^(AA|UU)" <<<"$git_info" | wc -l | tr -d "[:space:]")
 
 	# get the ahead and behind values
 	local tracking_branch=$(git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD))
